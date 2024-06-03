@@ -1,19 +1,54 @@
 package Main;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import Conexion.Conexion_DB;
 
 public class Main {
 	public static void main(String[] args) {
 		Conexion_DB conexion = new Conexion_DB();
-		System.out.println("Conectando a la base de datos...");
-		
+		// Paso 1. Obtener la conexion
 		Connection con =conexion.getConnection();
 		
-		// Algún procesamiento con la base de datos..
+		// Objetos necesarios para hacer una consulta
+		Statement sentencia =null;
+		ResultSet resultado = null;
 		
-		// Liberamos la conexion 
+		System.out.println("Conectando a la base de datos...");
+		
+		// Algún procesamiento con la base de datos..
+		try {
+			// Paso 2. Obtener el Statement
+			sentencia = con.createStatement();
+			
+			// Paso 3. Ejecutar la sentencia
+			resultado = sentencia.executeQuery("select cod_empleado, nombre, salario from empleados");
+			
+			System.out.println("Cod. Empleado\tNombre\tSalario");
+			// Paso 4. Recorrer el resultado
+			while (resultado.next()) {
+				int codEmpleado = resultado.getInt("cod_empleado");
+				String nombre = resultado.getString("nombre");
+				int salario = resultado.getInt("salario");
+				
+				System.out.println(codEmpleado + "\t"+ nombre + "\t"+ salario);
+			}
+		} catch (SQLException e) {
+			System.out.println("Error al consultar datos" + e.getMessage());
+		}
+		finally{
+			try {
+				resultado.close();
+				sentencia.close();
+			} catch (SQLException e) {
+				// Error al liberar recursos
+			}
+		}
+		
+		// Liberamos la conexion  
 		conexion.desconectar();
 		
 	}
